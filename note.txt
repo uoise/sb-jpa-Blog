@@ -1,0 +1,15 @@
+연관관계 주인 = fk를 가진 오브젝트
+
+연관관계의 주인 ? fk를 누가 가지고 있느냐
+jpa 는 그냥 board 를 select를 하는것이 아님
+-> board table 내의 user를 처리 불가
+따라서 board select를 할때 db에서 user를 join하여 처리함
+쓸모 있을 수 있으나 아닐 경우도 있음
+
+FetchType.Eager : 무조건 들고옴
+FetchType.Lazy : 나중에 들고옴
+
+
+json 왜 탄생, 어떻게 사용?
+@Controller <-req- json/mime
+return java -rsp-> json/mime
