@@ -13,3 +13,14 @@ FetchType.Lazy : 나중에 들고옴
 json 왜 탄생, 어떻게 사용?
 @Controller <-req- json/mime
 return java -rsp-> json/mime
+
+영속성 컨텍스트
+<- JPA가 가지고 있음
+
+모든 요청은 @Controller를 통해 모임, 응답도 여기서함 (CRUD)
+@Contoller 에서 user 객체를 만들어 save가 되면
+영속성 컨텍스트에서 user를 1차 캐시에 쌓임 : 영속화
+이를 db에 옮김 -> 테이블에 새 row로 쌓임 : flush
+flush가 진행될때 1차 캐시에서 사라지지 않음 -> select시 영속성 컨텍스트에 존재한다면 db를 거치지 않고 접근함
+update : select -> 영속화 -> "data 변경" save -> id를 비교하여 동일 객체가 영속화 되어있으면 수정 -> db와 동일하게 함
+@Transactional은 영속화된 객체를 가져와서 변경감지, 변경된 것이 있다면 db에 수정 -> 더티 체킹
