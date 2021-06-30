@@ -4,6 +4,7 @@ import com.uoi.blog.model.RoleType;
 import com.uoi.blog.model.User;
 import com.uoi.blog.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,6 +20,17 @@ public class DummyControllerTest {
 
     @Autowired // DI
     private UserRepository userRepository;
+
+    @DeleteMapping("/dummy/user/{id}")
+    public String delete(@PathVariable int id){
+        try {
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException e){
+            return " 삭제에 실패하였습니다. 해당 id:" + id+"는 DB에 없습니다.";
+        }
+
+        return "삭제되었습니다 id :"+id;
+    }
 
     // password, email만 수정
     @Transactional
