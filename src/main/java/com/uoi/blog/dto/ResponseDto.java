@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @Builder
 public class ResponseDto<T> {
-    HttpStatus status;
+    int status;
     // 실제로 db에 insert, 아래에서 return
     T data;
 }
