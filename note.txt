@@ -83,3 +83,99 @@ io가 완료되면 interrupt 이를 callback이라 함 -> io 관련 처리
 2) 서비스 의미 때문
  : 1~n개의 트랜잭션이 모인 기능의 한 종류
  : 여러 트랜잭션을 묶어서 처리하며, 성공하면 commit, 아니면 rollback
+
+트랜잭션 : 일이 처리되기 위한 가장 작은 단위, 여러 트랜잭션이 모여서 하나가 될수도 있음 -> 서비스
+트랜잭션 사용하는 이유 : 데이터의 변경을 위해 commit을 묶어서 사용함
+DB 격리수준
+ oracle :
+  read commit : commit이 되기 전 까지 read를 미룸
+  문제점 : select 시기에 따라 data가 변함 -> 부정합
+  data가 보였다,안보였다 하는 현상 -> phantom read
+  phantom read C 부정합
+   -> 해결방법 : repeatable read
+ mySQL :
+  InnoDB 스토리지 엔진
+  repeatable read로 해결 : 부정합 해결, phantom read 는 불가능
+  repeatable read : 트랜잭션이 종료되기 전까지는 db가 변하더라도 같은 값만을 select
+   이는 어떻게 작동? : 자기 트랜잭션 번호보다 낮은 undo로그만을 참조
+   문제점 : 트랜잭션만 정합성 보장, 단순 select는 보장되지 않음
+   cud는 commit이 필요하여 @Transactional 을 붙여 보장됨
+   select는 안붙이는 경우 있음 -> 앞으로는 붙이세요
+
+rsq
+-> web.xml -> 필터
+(1) JDBC 커넥션 시작
+(2) 트랜잭션 시작
+(3) 영속성 컨텍스트 시작 <- 사용자 마다 생성
+요청 분기 -> 서비스() 실행
+repository 생성 CRUD -> 영속성 컨텍스트에 객체 생성
+서비스에서 객체를 받음, 영속성에 있는 객체 값 처리
+분기로 리턴
+rsp
+(4)JDBC 커넥션 종료
+(5)트랜잭션 종료 - commit 변경감지(update 수행)
+(6)영속성 컨텍스트 종료
+
+-> 이 방식의 문제점?
+(4)~(6)의 종료시점이 rsp이 아닌 @Controller로 리턴 될때 수행되도 됨
+= 서비스가 종료될 때, 서비스에서 실질적인 로직이 실행 되기 때문
+JDBC세션, 트랜잭션, 영속성 컨텍스트의 부하가 줄어들음
+그래서 @Controller 리턴시 = 서비스 종료시 (4)~(6)이 수행됨
+(1)~(2)도 요청 분기 시 = 서비스 시작시 하면 부하감소
+
+개선안
+req -> web.xml -> 필터
+(1)영속성 컨텍스트 시작
+@Controller 요청 분기
+(2)JDBC 커넥션 시작
+(3)트랜잭션 시작
+@Service 시작
+@Repository 생성,select , DB에서 받아와 영속성 컨텍스트에 객체 저장
+@Repository를 통해 @Service로 객체 전달
+@Service에서 로직 수행
+(4)JDBC 커넥션 종료
+(5)트랜잭션 종료 -> 변경감지를 통한 commmit, flush를 통해 update
+(6)영속성 컨텍스트 종료
+@Controller, @RestController로 리턴 html, json을 통해 로직 수행을 알림
+rsp
+
+-> 이 때의 문제점
+이대호 조회 시, 분기, 서비스 호출, Repository가 영속성 컨텍스트를 확인
+영속성 컨텍스트의 1차 cache가 비어있다면 DB에서 가져와야함
+선수 table과 팀 table의 관계가 ManyToOne이고, 이의 기본 전략은 Eager
+Eager 전략은 관련된 Table을 가져옴 -> 이는 이대호 선수와 롯데 팀 정보가 영속성 컨텍스트에 저장
+Repository는 이대호 선수만 요청하여, 이대호 선수만 가져옴
+ORM이기 때문에 이대호 선수 객체안에 팀 객체도 존재, 팀 정보도 get해서 가져올 수 있음
+분기로 리턴 -> 영속성, jdbc, 트랜잭션 종료
+이 때 1차캐시에 남아있는 이대호 선수, 팀 롯데는 비영속 상태로 됨
+-> 영속성 컨텍스트가 종료됬기 때문
+rsp에서 이대호 선수 정보를 리턴 하면됨
+
+이때 eager가 아닌 lazy 전략으로 변경 가능
+lazy 전략은 관련 된 table을 들고 오지 않음, 즉 롯데 팀을 안 가져옴
+rsp 하기 전 @Controller에서 html(view)를 만들어 화면을 제공해야함
+이때 팀 정보가 필요할 경우, 팀 정보 못 가져옴
+왜? 영속성 컨텍스트가 종료되었기 때문, 다른 것도 종료 됨
+lazy 일때 팀 객체 대신, 롯데 팀 프록시 객체(빈 연결된 객체)를 대신 가져옴
+실제로는 팀정보 대신 프록시가 전달됨
+@Controller에서 프록시를 호출 한다고 해서 전부 종료되어서 아무것도 호출 못 함
+->따라서 영속성 컨텍스트 종료를 @Controller 종료로 변경 함
+이 때 프록시를 호출한다면, 트랜잭션은 건드리지 않고 jdbc커넥션만 연결하여 가져오고 종료함
+-> 이 전략의 장점
+ - 영속성 컨텍스트의 시작 종료 시점은 @Controller의 시작 종료시점
+ - 트랜잭션, jdbc의 시작 종료 시점은 @Service의 시작 종료시점
+ - db 부하 감소, @ManyToOne의 Lazy전략에서도 연결된 객체를 가져올 수 있음 (프록시가 jdbc커넥션을 일시적으로 생성)
+-> 단점
+ - @Controller에서 변경시 변경 불가능 : 영속성 컨텍스트만 유지되어 있고, 트랜잭션은 종료되어 불가능(commit 불가)
+
+applicatinion.yml 의 jpa: open-in-view: true로 설정할 경우 lazy 로딩이 가능
+영속성을 프레젠테이션 계층까지 유지, 트랜잭션은 service에서 종료됨
+User Interface = Controller 라고 생각'
+--------!!!!!--------
+따라서 lazy loading : User Interface가 proxy를 통해 객체를 로딩하는 것
+OSIV : open session in view <- spring 2.0에서 default로 설정 됨
+OSIV는 Persistence Context의 지속기간을 User Interface까지 유지하는 것이고
+이를 비활성화 하면 Persistence Context의 지속기간이 Service까지 유지됨
+--------!!!!!--------
+
+?? : view에서 호출시 다른 트랜잭션에 의해 변경된다면 다른 결과 나오는지?

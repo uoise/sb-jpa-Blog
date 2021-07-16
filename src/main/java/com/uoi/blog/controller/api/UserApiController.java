@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
+
 @RestController
 public class UserApiController {
 
@@ -22,5 +24,17 @@ public class UserApiController {
         user.setRole(RoleType.USER);
         userService.회원가입(user); // 1이면 성공, 0이면 실패
         return new ResponseDto<Integer>(HttpStatus.OK.value(), 1); // java obj -> json
+    }
+
+    @PostMapping("/api/user/login")
+    public ResponseDto<Integer> login(@RequestBody User user, HttpSession session){
+        System.out.println("UAC: login() 호출");
+        User principal = userService.로그인(user); // principal (접근주체)
+
+        if(principal != null){
+            session.setAttribute("principal", principal);
+        } // 세션도 @AutoWired로 변수 선언해서도 DI가능
+        // 그냥 Parameter로도 가능
+        return new ResponseDto<Integer>(HttpStatus.OK.value(),1);
     }
 }
