@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF8"
          pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+
+<sec:authorize access="isAuthenticated()">
+    <sec:authentication property="principal" var="principal"/>
+</sec:authorize>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,34 +19,33 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-
 <nav class="navbar navbar-expand-md bg-dark navbar-dark">
-    <a class="navbar-brand" href="/blog">NuBlog</a>
+    <a class="navbar-brand" href="/">NuBlog</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="collapsibleNavbar">
         <c:choose>
-            <c:when test="${empty sessionScope.principal}">
+            <c:when test="${empty principal}">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/user/loginForm">Login</a>
+                        <a class="nav-link" href="/auth/loginForm">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/user/joinForm">Register</a>
+                        <a class="nav-link" href="/auth/joinForm">Register</a>
                     </li>
                 </ul>
             </c:when>
             <c:otherwise>
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/user/board/writeForm">New Post</a>
+                        <a class="nav-link" href="/board/Form">New Post</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/user/userForm">User Page</a>
+                        <a class="nav-link" href="/user/form">User Page</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/blog/user/logout">Logout</a>
+                        <a class="nav-link" href="/logout">Logout</a>
                     </li>
                 </ul>
             </c:otherwise>
