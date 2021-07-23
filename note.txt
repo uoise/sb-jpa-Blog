@@ -102,7 +102,7 @@ DB 격리수준
    cud는 commit이 필요하여 @Transactional 을 붙여 보장됨
    select는 안붙이는 경우 있음 -> 앞으로는 붙이세요
 
-rsq
+req
 -> web.xml -> 필터
 (1) JDBC 커넥션 시작
 (2) 트랜잭션 시작
@@ -211,3 +211,36 @@ csrf :
 우리는 왜 비활성화?
 user.js에서 ajax에 별도로 토큰에 관한 문장이 없어 차단됨
 ->시큐리티 기본기능
+
+ViewResolver : 페이지를 만들어서 응답
+page에 대한 jsp를 찾아서 html로 만들어서 return -> controller만
+RestController는 page라는 메세지 자체 return
+
+Interceptor : 특정 method 직전에 작동하는 함수 -> filter, aop와 유사
+- filter : req, rsp를 거르는 역할, req : Dispatcher 이전에 , rsp : Dispatcher 이후
+- Interceptor : Controller 호출 전,후 context 내부에서 처리, 특정 컨트롤러의 권한 체크등의 역할
+- AOP : 특정 메서드 전후 등 자유로운 지점에서 사용가능, 어노테이션, 주소, 파라미터 등으로 대상 지정가능
+서비스는 여러 트랜잭션의 기능을 묶어서 수행하는 역할, 이중 일부가 작동하지 않을경우 rollback
+
+--- 오늘의 영단어 ---
+authentication: 행위의 사용자를 확인
+authorization: 행위의 권한을 확인
+https://docs.oracle.com/javase/8/docs/technotes/guides/security/jaas/JAASRefGuide.html
+
+serializable: 객체의 텍스트화
+deserializable: 텍스트의 객체화
+--- JAAS 검색 해 ---
+
+======세션을 강제로 만드는 법 : Authentication 강제로 대입 <- 안됨!=======
+로그인 요청
+인증필터: UsernamePasswordAuthenticationToken 생성 -> 파라미터로 principal, credential, principal.getAttributes()
+- credential: principal이 맞다는것을 인증하는 자격증명 객체
+AuthenticationManger: Token 전달, Token을 통해 Authentication 생성
+ - 세션 객체 내부의 SecurityContext 에 Authentication 객체를 넣어야함
+ - username, password 전달해야함, 이는 Token 을 통해 전달됨
+ - 만들때 조건: DB에 있어야함
+userDetailService : DB에 질의, 응답을 전달
+ - username은 Token으로 전달
+ - password는 Bcrypt로 암호화 후 전달
+Authentication: username, password 가 있다면 Authentication 생성, 세션에 저장
+=======================================================안됨========

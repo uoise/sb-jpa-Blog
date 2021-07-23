@@ -3,6 +3,10 @@ let index={
         $("#btn-save").on("click",()=>{ // function 을 사용하지 않는 이유 : this를 바인딩 하기 위해서!!
             this.save();
         });
+
+        $("#btn-update").on("click",()=>{ // function 을 사용하지 않는 이유 : this를 바인딩 하기 위해서!!
+            this.update();
+        });
     },
 
     save: function (){
@@ -32,6 +36,29 @@ let index={
             location.href="/";
         }).fail(function(error){
             // 실패하면 이부분 실행
+            alert(JSON.stringify(error));
+        });
+    },
+
+    update: function (){
+        let data={
+            id: $("#id").val(),
+            username: $("#username").val(),
+            password: $("#password").val(),
+            email: $("#email").val()
+        };
+        $.ajax({
+            // 회원가입 수행 요청(100초)
+            type: "PUT",
+            url: "/user",
+            data: JSON.stringify(data), // http body data
+            contentType: "application/json; charset=utf8",
+            dataType: "json"
+
+        }).done(function(resp){
+            alert("회원수정이 완료 되었습니다.");
+            location.href="/";
+        }).fail(function(error){
             alert(JSON.stringify(error));
         });
     },
