@@ -217,7 +217,7 @@ page에 대한 jsp를 찾아서 html로 만들어서 return -> controller만
 RestController는 page라는 메세지 자체 return
 
 Interceptor : 특정 method 직전에 작동하는 함수 -> filter, aop와 유사
-- filter : req, rsp를 거르는 역할, req : Dispatcher 이전에 , rsp : Dispatcher 이후
+- filter : req, rsp를 거르는 역할, req : Dispatcher 이전에, rsp : Dispatcher 이후
 - Interceptor : Controller 호출 전,후 context 내부에서 처리, 특정 컨트롤러의 권한 체크등의 역할
 - AOP : 특정 메서드 전후 등 자유로운 지점에서 사용가능, 어노테이션, 주소, 파라미터 등으로 대상 지정가능
 서비스는 여러 트랜잭션의 기능을 묶어서 수행하는 역할, 이중 일부가 작동하지 않을경우 rollback
@@ -244,3 +244,15 @@ userDetailService : DB에 질의, 응답을 전달
  - password는 Bcrypt로 암호화 후 전달
 Authentication: username, password 가 있다면 Authentication 생성, 세션에 저장
 =======================================================안됨========
+
+OAuth(Open Auth): 인증 처리를 대신함, 자원에 접근할 권한을 부여
+카카오 로그인 과정
+1. user가 카카오 api를 통해 로그인, 동의 창 제공됨
+2. 카카오 api가 callback 링크 제공, code 제공으로 인증
+3. blog 서버가 code를 api에 제공
+4. api는 AccessToken으로 카카오 자원 서버 접근 권한 부여
+5. AccessToken 으로 개인정보 접근
+
+user: resource owner, blog: client, api: auth server, 자원: resource server
+
+Spring Official OAuth: Facebook, google -> OAuth2 Client lib
