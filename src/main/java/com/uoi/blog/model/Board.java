@@ -1,5 +1,6 @@
 package com.uoi.blog.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +38,8 @@ public class Board {
     // orm을 사용하면 오브젝트가 fk로 저장됨
 
     @OneToMany(mappedBy = "board", fetch = FetchType.EAGER) // 연관관계의 주인이 아니다. (fk가 아니다), db에 칼럼을 만들지 말것
-    private List<Reply> reply;
+    @JsonIgnoreProperties({"board"})
+    private List<Reply> replys;
     // fk가 필요 없음, replyid를 더 추가하여 가질수 없음, 1정규화 깨짐 -> 원자성
     
     @CreationTimestamp

@@ -35,10 +35,11 @@ public class UserController {
 
     @GetMapping("/auth/kakao/callback")
     public @ResponseBody String kakaoCallback(String code){
+        System.out.println(code);
 
         // POST 방식으로 k=v 데이터 요청
         // Retrofit2, OkHttp, RestTemplate
-        
+
         RestTemplate rt = new RestTemplate();
         // HttpHeader 오브젝트 생성
         HttpHeaders headers = new HttpHeaders();
@@ -63,7 +64,7 @@ public class UserController {
                 kakaoTokenRequest,
                 String.class
         );
-        return "카카오 토큰 요청 완료, 토큰 요청의 응답 : " + response;
+        return response.getBody();
     }
 
     @GetMapping("/user/updateForm")

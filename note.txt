@@ -256,3 +256,6 @@ OAuth(Open Auth): 인증 처리를 대신함, 자원에 접근할 권한을 부�
 user: resource owner, blog: client, api: auth server, 자원: resource server
 
 Spring Official OAuth: Facebook, google -> OAuth2 Client lib
+
+reply에서 reply.content는 문제가 안됨, reply.user 참조시 그 user가 board를 참조하는 문제발생
+-> 무한 참조 문제 : db에 연결된 항목을 가져올때 자기 자신도 참조되어 무한히 참조되는 현상
