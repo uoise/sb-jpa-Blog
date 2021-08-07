@@ -39,6 +39,7 @@ public class Board {
 
     @OneToMany(mappedBy = "board", fetch = FetchType.EAGER) // 연관관계의 주인이 아니다. (fk가 아니다), db에 칼럼을 만들지 말것
     @JsonIgnoreProperties({"board"})
+    @OrderBy("id desc")
     private List<Reply> replys;
     // fk가 필요 없음, replyid를 더 추가하여 가질수 없음, 1정규화 깨짐 -> 원자성
     
