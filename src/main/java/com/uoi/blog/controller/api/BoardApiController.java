@@ -1,6 +1,7 @@
 package com.uoi.blog.controller.api;
 
 import com.uoi.blog.config.auth.PrincipalDetail;
+import com.uoi.blog.dto.ReplySaveRequestDto;
 import com.uoi.blog.dto.ResponseDto;
 import com.uoi.blog.model.Board;
 import com.uoi.blog.model.Reply;
@@ -34,10 +35,11 @@ public class BoardApiController {
         return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
     }
 
-    @PostMapping("/api/board/{id}/reply")
-    public ResponseDto<Integer> replySave(@PathVariable int boardId, @RequestBody Reply reply, @AuthenticationPrincipal PrincipalDetail principal){
+    // 데이터 받을 때 Controller 에서 dto를 만드는 것이 좋음
+    @PostMapping("/api/board/{boardId}/reply")
+    public ResponseDto<Integer> replySave(@RequestBody ReplySaveRequestDto replySaveRequestDto){
 
-        boardService.댓글쓰기(principal.getUser(), boardId, reply);
+        boardService.댓글쓰기(replySaveRequestDto);
         return new ResponseDto<Integer>(HttpStatus.OK.value(), 1);
     }
 

@@ -1,5 +1,6 @@
 package com.uoi.blog.model;
 
+import com.uoi.blog.dto.ReplySaveRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
